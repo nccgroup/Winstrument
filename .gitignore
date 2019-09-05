@@ -1,0 +1,9 @@
+settings.json
+__pycache__
+db.sqlite3
+#virtualenv
+frida-dev/ 
+build/
+dist/
+*.egg-info
+.vscode

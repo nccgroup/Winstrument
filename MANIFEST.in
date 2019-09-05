@@ -1,0 +1,4 @@
+include README.md
+include winstrument/modules/metadata.toml
+include db.sqlite3
+include winstrument/modules/js/*.js

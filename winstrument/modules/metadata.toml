@@ -1,0 +1,25 @@
+[DLLS]
+description = """Hooks LoadLibrary-family system calls and outputs DLL loads where part of the search path might be
+writable by the current user or a low-priviliged user group."""
+
+[com_hijack]
+description = """ Looks for attempted loads of CLSID keys in HKCU that don't actually exist. This indicates the posibility of COM-Hijacking vulnerabilities."""
+[File_RW]
+description = """Hooks CreateFile, ReadFile and WriteFile class of system calls.
+Outputs filehandles opened, permissions used and bytes read/written when applicable."""
+
+[Process]
+description = """
+Outputs programs and args created using the CreateProcess system call."""
+
+[Pipes]
+description="""Outputs info related to named pipe syscalls."""
+
+[Impersonate]
+description = """ Displays which user(s) a process impersonates, if any """
+[Registry] 
+description = """
+Outputs reads to the registry using RegOpenKey, RegGetValue and RegQueryValueEx"""
+
+[Socket]
+description = """Outputs target protcol, ip and port for TCP/UDP network activity."""

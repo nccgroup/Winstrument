@@ -27,7 +27,7 @@ from winstrument.data.module_message import ModuleMessage
 
 
 class Winstrument():
-    #adapated from https://github.com/frida/frida-python/blob/master/examples/child_gating.py
+    #adapted from https://github.com/frida/frida-python/blob/master/examples/child_gating.py
     CORE_MODNAME = "core"
 
     def __init__(self):
@@ -239,7 +239,7 @@ class Winstrument():
 
     def _start(self,target,args=None):
         """
-        Spawn the target process and then insturment it with any available scripts.
+        Spawn the target process and then instrument it with any available scripts.
         If not found, write a warning to STDERR.
         target: str - Path to the process to spawn
         args: list or None - list of command line arguments to use with the target
@@ -304,7 +304,7 @@ class Winstrument():
                 instrumentation = moduleclass(session, path, self._db)
                 self._instrumentations.append(instrumentation)
                 instrumentation.load_script()
-        print(f"instrumented proces with pid: {pid} and path: {path}")
+        print(f"instrumented process with pid: {pid} and path: {path}")
         self._device.resume(pid)
         self._sessions.add(session)
 

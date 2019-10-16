@@ -12,11 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import sqlite3
-from winstrument.data.module_message import ModuleMessage
-import sys
-from datetime import datetime
-import json
 import os
 import toml
 class SettingsController:

@@ -67,7 +67,7 @@ description = """Hooks LoadLibrary-family system calls and outputs DLL loads whe
 writable by the current user or a low-privileged user group."""
 ~~~
 
-The program uses a sqlite3 database to store settings and output. This is stored in `db.sqlite3`.
+The program stores settings in `settings.toml` in `%APPDATA%/winstrument`.
 As most, if not all, modules will inject Javascript into the target process, the `modules/js/` directory contains Frida Javascript snippets which are loaded and injected by modules. 
 These files should have the same name as the module i.e. the module `dlls.py` would use JS from `js/dlls.js`.
 

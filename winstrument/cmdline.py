@@ -58,16 +58,16 @@ class FridaCmd(cmd2.Cmd):
         if self.debug and sys.exc_info() != (None,None,None):
             import traceback
             traceback.print_exc()
-            
+
         if isinstance(errmsg, Exception):
             err = f"{Fore.RED}EXCEPTION of type {type(errmsg)} occurred with message: {errmsg}{Style.RESET_ALL}"
         else:
             err = f"{Fore.RED}{errmsg}"
 
         if not self.debug and 'debug' in self.settable:
-            err += f"\n{Fore.YELLOW}For more complete error output, use \"config debug true\" {Style.RESET_ALL}" 
+            err += f"\n{Fore.YELLOW}For more complete error output, use \"config debug true\" {Style.RESET_ALL}"
         self.perror(err, end=end, apply_style=False)
-    
+
     @with_argument_list
     def do_load(self, arg):
         """
@@ -120,7 +120,7 @@ class FridaCmd(cmd2.Cmd):
             info = f"Available formatters:\n{self._get_formatter_list()}"
             self.poutput(info)
             return
-        
+
         if len(arg) == 1:
             self.print_format(arg[0], sys.stdout )
             return
@@ -130,19 +130,20 @@ class FridaCmd(cmd2.Cmd):
 
     def print_format(self, modulename, outfile, formatter=None):
         if formatter is not None:
-            try: 
+            try:
                 style = utils.get_formatter(formatter)
             except ValueError:
                 print(f"Invalid format\nAvailable formatters:\n{self._get_formatter_list()}")
                 return
             self._app.print_saved_output(modulename, style, output=outfile)
         else:
-            self._app.print_saved_output(modulename, output=outfile) 
+            self._app.print_saved_output(modulename, output=outfile)
 
     @with_argument_list
     def do_export(self,args):
-        """usage: export <modulename> <filename> [format]
-            Exports the stored output of module <modulename> to the file stored in filename in the given format
+        """
+        usage: export <modulename> <filename> [format]
+        Exports the stored output of module <modulename> to the file stored in filename in the given format
         """
         if len(args) < 1:
             self.perror("usage: export <modulename> <filename> [format]")
@@ -162,7 +163,8 @@ class FridaCmd(cmd2.Cmd):
 
     @with_argument_list
     def do_exportall(self,args):
-        """usage: exportall <filename> [format] 
+        """
+        usage: exportall <filename> [format]
         Export stored output from all modules into the specified file
         Optionally specify the preferred format to output.
         """
@@ -176,27 +178,27 @@ class FridaCmd(cmd2.Cmd):
                 self.perror("usage: exportall <filename> [format]")
                 return
         else:
-            with open(args[0], 'w+') as outfile:                    
+            with open(args[0], 'w+') as outfile:
                 if len(args) == 1:
                     self._app.export_all(outfile)
                     return
                 else:
-                    try: 
+                    try:
                         style = utils.get_formatter(args[1])
                     except ValueError:
                         print(f"Invalid Formatter\nAvailable formatters:\n{self._get_formatter_list()}")
                     self._app.export_all(outfile,formatter=style)
-        
+
     def do_config(self,args):
         """
         usage: config [setting, [value]]
-        Configure options related to the CLI 
+        Configure options related to the CLI
         """
 
         super().do_set(args)
     @with_argument_list
     def do_set(self,args):
-        """ 
+        """
         usage: set [setting [value]]
         Configure settings for winsturment framework
         with no arguments: show settings

@@ -23,7 +23,7 @@ Interceptor.attach(Module.getExportByName("Kernel32.dll","CreateNamedPipeA"), {
         this.pipemode=args[1].toInt32();
         },
         onLeave: function(ret) {
-    
+
         this.fh = ret.toInt32();
         pipes[this.fh] = this.pipename
         send({"function": "CreateNamedPipeA", "fh": this.fh, "pipename": this.pipename, "openmode": this.openmode, "pipemode":this.pipemode});
@@ -36,7 +36,7 @@ Interceptor.attach(Module.getExportByName("Kernel32.dll","ConnectNamedPipe"), {
     {
         this.fh = args[0].toInt32;
         this.pipename = pipes[this.fh];
-    
+
         this.fh = ret.toInt32();
         send({"function": "ConnectNamedPipe", "fh": this.fh, "pipename": this.pipename});
     }

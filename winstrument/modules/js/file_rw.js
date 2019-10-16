@@ -33,7 +33,6 @@ Interceptor.attach(Module.getExportByName('kernel32.dll','WriteFile'), {
                 this.data["bytes_written"] = this.data["bytes_to_write"]
             }
             send(this.data)
-            
         }
     });
 
@@ -68,7 +67,7 @@ Interceptor.attach(Module.getExportByName('kernel32.dll','ReadFileEx'), {
             }
             send(data)
         }
-}); 
+});
 Interceptor.attach(Module.getExportByName('kernel32.dll','CreateFileW'), { //Unicode Version, need to handle encoding differently for ansi one, but otherwise identical
             onEnter: function(args) {
                      this.function = "CreateFileW";
@@ -76,7 +75,7 @@ Interceptor.attach(Module.getExportByName('kernel32.dll','CreateFileW'), { //Uni
                      this.mode = args[1].toString();
                 },
             onLeave: function(ret) {
-                var data = { 
+                var data = {
                     "function": this.function,
                     "path": this.path,
                     "mode": this.mode,
@@ -86,14 +85,14 @@ Interceptor.attach(Module.getExportByName('kernel32.dll','CreateFileW'), { //Uni
                 send(data)
             }
          });
-Interceptor.attach(Module.getExportByName('kernel32.dll','CreateFileA'), { //ANSI Version 
+Interceptor.attach(Module.getExportByName('kernel32.dll','CreateFileA'), { //ANSI Version
             onEnter: function(args) {
                      this.function = "CreateFileA";
                      this.path = args[0].readAnsiString();
                      this.mode = args[1].toString();
                 },
             onLeave: function(ret) {
-                var data = { 
+                var data = {
                     "function": this.function,
                     "path": this.path,
                     "mode": this.mode,

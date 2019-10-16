@@ -16,7 +16,7 @@ from winstrument.base_module import BaseInstrumentation
 
 class Pipes(BaseInstrumentation):
     modulename = "pipes"
-    
+
     pipe_enums = {0x1: "PIPE_ACCESS_INBOUND", 0x2: "PIPE_ACCESS_OUTBOUND", 0x3: "PIPE_ACCESS_DUPLEX", 0x00080000: "FILE_FLAG_FIRST_PIPE_INSTANCE", }
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

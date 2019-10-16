@@ -19,7 +19,6 @@ var hkeys={};
         Interceptor.attach(Module.getExportByName("KernelBase.dll",name), {
             //This should theoretically also hook RegOpenKeyW from Kernel32.dll/ADVAPI.dll because those calls go to RegOpenKeyExW in KernelBase (on Win 10 at least)
             onEnter: function(args) {
-
                 this.hkey = args[0].toString();
                 this.subkey = args[1].readUtf16String();
                 this.hsubkey = args[4];
@@ -44,13 +43,13 @@ var hkeys={};
             },
         })
     });
-   
+
     Interceptor.attach(Module.getExportByName("KernelBase.dll","RegQueryValueExW"), {
         onEnter: function(args) {
             if(args[0].toInt32() in hkeys)
             {
                 var val = args[1].readUtf16String();
-                if (val) 
+                if (val)
                 {
                     var hkey = args[0].toInt32();
                     var path = hkeys[hkey];
@@ -61,8 +60,5 @@ var hkeys={};
                     });
                 }
             }
-            
         }
-
-
     });

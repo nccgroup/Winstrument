@@ -29,10 +29,10 @@ setuptools.setup(
     ],
     include_package_data=True,
     packages=setuptools.find_packages(),
-    entry_points = {'console_scripts': [
-        'winstrument=winstrument.cmdline:main',
-    ],
-    
+    entry_points = {
+        'console_scripts': [
+            'winstrument=winstrument.cmdline:main',
+        ],
     },
     classifiers=[
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -40,8 +40,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3.7",
         "Topic :: Security",
         "Topic :: System :: Operating System",
-
-
     ],
-    keywords='winstrument instrumentation frida reversing'
+    keywords='winstrument instrumentation frida reverse engineering'
 )

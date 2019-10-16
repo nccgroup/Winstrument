@@ -31,7 +31,7 @@ def format_json(messagelist,verbosity=0):
 def mask_to_str(mask, enum_map):
     """
     Attempts to produce a string of set flags from the given mask and dict of enum value-to-name mappings
-    mask: int - bitmask from e.g. Windows API 
+    mask: int - bitmask from e.g. Windows API
     enum_map: dict[int -> str]
     returns a string in the form: FLAG 1 | FLAG 2 ...
     """

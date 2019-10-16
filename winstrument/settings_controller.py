@@ -20,18 +20,18 @@ class SettingsController:
         self.settings = {}
         self._settings_filename = filename
         self.read_settings()
-   
+
     def read_settings(self):
         if not os.path.exists(self._settings_filename):
             self.settings = {}
             return
         with open(self._settings_filename,'r') as settings_file:
            self.settings = toml.loads(settings_file.read())
-   
+
     def save_settings(self):
         with open(self._settings_filename, 'w') as settings_file:
           settings_file.write(toml.dumps(self.settings))
-   
+
     def get_module_settings(self,modname):
         """
         Retrieve all settings for a given module name
@@ -70,7 +70,8 @@ class SettingsController:
         modname - str
         key - str
         Returns the setting value if it exists
-        Returns None if the key does not exist, or the module has no config       """
+        Returns None if the key does not exist, or the module has no config
+        """
         try:
             return self.settings[modname].get(key,None)
         except KeyError: #module does not exist
@@ -84,12 +85,12 @@ class SettingsController:
         Returns the setting value as int. Returns None if the setting isn't parsable to int or does not exist.
         """
         val=self.settings[modname].get(key,None)
-        try: 
+        try:
             num = int(val)
         except TypeError:
             num = None
         return num
-            
+
     def get_setting_boolean(self, modname, key):
         """
         Gets the boolean representation of the string setting stored in key for modname

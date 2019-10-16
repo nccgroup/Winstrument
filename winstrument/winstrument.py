@@ -24,7 +24,7 @@ import json
 import toml
 from winstrument.db_connection import DBConnection
 from winstrument.settings_controller import SettingsController
-from winstrument.data.module_message import ModuleMessage 
+from winstrument.data.module_message import ModuleMessage
 from datetime import datetime
 
 class Winstrument():
@@ -34,7 +34,7 @@ class Winstrument():
     def __init__(self):
         appdata_path = os.environ["appdata"]
         data_path = os.path.join(appdata_path,"winstrument")
-        
+
         if not os.path.exists(data_path):
             os.mkdir(data_path)
 
@@ -63,7 +63,8 @@ class Winstrument():
         self._instrumentations = []
 
     def get_metadata(self, filename="metadata.toml"):
-        """ Parse the metadata.toml file for module metadata like descriptions, if present.
+        """
+        Parse the metadata.toml file for module metadata like descriptions, if present.
         Returns dict of metadata, or None if the file is not present or invalid.
         """
 
@@ -71,7 +72,7 @@ class Winstrument():
         try:
             metadata = toml.load(metadata_filepath)
             return dict((k.lower(), v) for k,v in metadata.items()) #modulenames are lowercase
-                
+
         except toml.TomlDecodeError:
             metadata = None
         return metadata
@@ -82,7 +83,7 @@ class Winstrument():
         returns a list with module names
         """
         return self._available_modules.copy()
-    
+
     def get_loaded_modules(self):
         """
         Gets a list of all modules that have already been loaded
@@ -93,20 +94,20 @@ class Winstrument():
     def export_all(self, outfile, formatter=utils.format_table):
         """
         Write the output for all modules to the given output stream in the desired format
-        outfile - file stream object. This could be a normal file or sys.stdout 
+        outfile - file stream object. This could be a normal file or sys.stdout
         formatter - callable which takes a list of ModuleMessage objects and returns a string to output. See utils.py
         No return, but writes the output stream
         """
 
         for module in self.get_available_modules():
             self.print_saved_output(module,formatter,outfile)
-            
+
     def print_saved_output(self, modulename, formatter=utils.format_table, output=sys.stdout):
         """
         Write the output for the given module to the given output stream in the desired format.
         modulename - str
         formatter - callable which takes a list of ModuleMessage objects and returns a string to output. See utils.py
-        output - file stream object. This could be a normal file or sys.stdout 
+        output - file stream object. This could be a normal file or sys.stdout
         No return, but writes the output stream
         """
         messages = self._db.read_messages(modulename)
@@ -161,7 +162,7 @@ class Winstrument():
                 module = importlib.import_module(f"{modulepath}.{modulename}")
                 if module not in self._loaded_modules:
                     self._loaded_modules.append(modulename)
-                    
+
             except ImportError:
                 print(f"Error: module '{modulename}' not found, skiping!")
                 self._modules_to_load.remove(modulename)
@@ -169,9 +170,9 @@ class Winstrument():
 
     def run(self,target=None,arglist=None):
         """
-            Schedule frida to spawn the target process, then instrument it.
-            target: str - path to target to spawn
-            arglist: list - arguments to pass to target when spawned
+        Schedule frida to spawn the target process, then instrument it.
+        target: str - path to target to spawn
+        arglist: list - arguments to pass to target when spawned
         """
         if target:
             process = target
@@ -188,8 +189,6 @@ class Winstrument():
         If not found, write a warning to STDERR.
         target: str - Path to the process to spawn
         args: list or None - list of command line arguments to use with the target
-
-
         """
         if target is None:
             sys.stderr.write(f"{Fore.RED} No target set. Use 'set target <target> to specify a program to instrument.\n{Style.RESET_ALL}")
@@ -204,11 +203,11 @@ class Winstrument():
         except frida.ExecutableNotFoundError:
             sys.stderr.write(f"{Fore.RED}Target {target} not found! Make sure the path is correct.\n{Style.RESET_ALL}")
             self.stop()
-            return 
+            return
         print("Spawned " + str(pid))
         self._instrument(pid, target)
 
-    def _stop_if_idle(self): 
+    def _stop_if_idle(self):
         """
         Helper function used with Frida reactor. Stops the reactor if there are no queued child sessions.
         """
@@ -224,11 +223,11 @@ class Winstrument():
 
     def quit(self):
         """
-        Save settings to settings file. """
+        Save settings to settings file.
+        """
         self.settings_controller.save_settings()
         self._db.close()
-       
-        
+
     def _instrument(self, pid, path):
         """
         Iterates over currently loaded modules and performs instrumentation on the target process for each.
@@ -261,7 +260,7 @@ class Winstrument():
         reason: str - Reason provided by Frida for why the target terminated
         """
         print (f"detached from {pid} for reason {reason}")
-        for instrumentation in self._instrumentations: 
+        for instrumentation in self._instrumentations:
             instrumentation.on_finish()
         self._instrumentations.clear() #reset for next session, if any
         self._sessions.remove(session)
@@ -276,7 +275,7 @@ class Winstrument():
         child - object
         """
         self._instrument(child.pid,child.path)
-    
+
     def _on_child_removed(self,child):
         """
         Callback called by Frida reactor when a child process ends.
@@ -294,4 +293,3 @@ if __name__ == '__main__':
     else:
         args = None
     app.run(sys.argv[1],args)
-    

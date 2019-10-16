@@ -17,7 +17,7 @@ description="""Outputs info related to named pipe syscalls."""
 
 [Impersonate]
 description = """ Displays which user(s) a process impersonates, if any """
-[Registry] 
+[Registry]
 description = """
 Outputs reads to the registry using RegOpenKey, RegGetValue and RegQueryValueEx"""
 

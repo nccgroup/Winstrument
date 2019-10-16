@@ -25,7 +25,7 @@ class DBConnection():
         self._db = sqlite3.connect(dbpath,check_same_thread=False)
         self._dbpath = dbpath
         self._cursor = self._db.cursor()
-        self._cursor.execute("""CREATE TABLE IF NOT EXISTS output 
+        self._cursor.execute("""CREATE TABLE IF NOT EXISTS output
                             (id INTEGER PRIMARY KEY,
                             modname TEXT NOT NULL,
                             time TEXT NOT NULL,
@@ -38,7 +38,7 @@ class DBConnection():
         Insert the given message into the sqlite DB output table
         message - ModuleMessage object
         """
-        self._cursor.execute("""INSERT INTO "output" (modname, time, target, message) VALUES (?,?,?,?)""", (message.module, message.time, message.target, json.dumps(message.data))) 
+        self._cursor.execute("""INSERT INTO "output" (modname, time, target, message) VALUES (?,?,?,?)""", (message.module, message.time, message.target, json.dumps(message.data)))
         self._db.commit()
 
     def clear_output(self):
@@ -67,6 +67,3 @@ class DBConnection():
     def close(self):
         self._db.close()
         os.remove(self._dbpath)
-
-
-    

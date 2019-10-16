@@ -16,10 +16,10 @@ from winstrument.base_module import BaseInstrumentation
 import win32security
 
 class Impersonate(BaseInstrumentation):
-    modulename = "impersonate" 
+    modulename = "impersonate"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-    
+
     def on_message(self, message, data):
         if message["type"] == "error":
             print(message)

@@ -29,11 +29,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         },
         onLeave: function(ret)
         {
-            if (this.hasClsid && ret.toInt32() !== 0) 
+            if (this.hasClsid && ret.toInt32() !== 0)
             {
                 send({"function":name, "subkey": this.subkey});
             }
         }
-        
     });
 });

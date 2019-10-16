@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import frida,sys 
+import frida,sys
 import win32api
 import win32con
 import win32security
@@ -33,13 +33,12 @@ class DLLs(BaseInstrumentation):
         self._loaded_dlls = set()
         self._known_dlls = None
         self._dll_perms = {}
-    
 
     def _parse_ace_entry(self, ace):
 #        ace_types = {win32security.ACCESS_ALLOWED_ACE_TYPE: "ACCESS_ALOWED_ACE",
 #            win32security.ACCESS_DENIED_ACE_TYPE: "ACCESS_DENIED_ACE",
 #             win32security.SYSTEM_AUDIT_ACE_TYPE: "SYSTEM_AUDIT_ACE"}
-        ace_flag_types = ["OBJECT_INHERIT_ACE", "CONTAINER_INHERIT_ACE", 
+        ace_flag_types = ["OBJECT_INHERIT_ACE", "CONTAINER_INHERIT_ACE",
             "NO_PROPAGATE_INHERIT_ACE", "INHERIT_ONLY_ACE", "INHERITED_ACE"]
         ace_perms = [
         "FILE_ADD_FILE","FILE_APPEND_DATA", "FILE_ADD_SUBDIRECTORY","FILE_READ_EA",
@@ -73,7 +72,7 @@ class DLLs(BaseInstrumentation):
         else:
             principal = str(sid)
         AceEntry = collections.namedtuple("AceEntry", "sid principalname perms flags")
-        return AceEntry(sid=sid,principalname=principal,perms=perms,flags=flagstr) 
+        return AceEntry(sid=sid,principalname=principal,perms=perms,flags=flagstr)
 
     def _get_users_with_write_perms(self,filepath):
         users = set()
@@ -97,7 +96,7 @@ class DLLs(BaseInstrumentation):
             ace = acl.GetAce(i)
             aces.append(ace)
         return aces
-        
+
     def _get_known_dlls(self):
         known_dll_subkey= "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\KnownDLLs"
         known_dlls_hkey = win32api.RegOpenKeyEx(win32con.HKEY_LOCAL_MACHINE, known_dll_subkey)
@@ -114,15 +113,16 @@ class DLLs(BaseInstrumentation):
         return known_dlls
 
     def _get_dll_search_path(self):
-        """  Returns a list of paths for which the system will search for DLLs
+        """
+        Returns a list of paths for which the system will search for DLLs
         Per MSDN the DLL search order is as follows:
         1. The directory from which the application loaded.
         2. The system directory. Use the GetSystemDirectory function to get the path of this directory.
         3. The 16-bit system directory. There is no function that obtains the path of this directory, but it is searched.
-        4. The Windows directory. Use the GetWindowsDirectory function to get the path of this directory. 
+        4. The Windows directory. Use the GetWindowsDirectory function to get the path of this directory.
         5. The current directory.
         6. The directories that are listed in the PATH environment variable. Note that this does not include the per-application path specified by the App Paths registry key. The App Paths key is not used when computing the DLL search path.
-        
+
         Note: any DLLS in the KnownDLLs registry key will bypass he search order
         """
 
@@ -139,20 +139,20 @@ class DLLs(BaseInstrumentation):
 
     def _resolve_relative_dll_path(self, dllpath):
         #ignore any duplicate loads
-        if not dllpath.lower().endswith(".dll"): 
+        if not dllpath.lower().endswith(".dll"):
             dllpath = dllpath + ".dll"
-        if dllpath.lower() in self._loaded_dlls: 
+        if dllpath.lower() in self._loaded_dlls:
             return
         searched = []
         if not self._known_dlls:
             self._known_dlls = self._get_known_dlls()
-        if dllpath.lower() in self._known_dlls: 
+        if dllpath.lower() in self._known_dlls:
             dll_abspath = os.path.join(win32api.GetSystemDirectory(),dllpath) #known dlls should be here
             self._loaded_dlls.add(dllpath.lower())
             found = True
             return
         dirs = self._get_dll_search_path()
-        found = False 
+        found = False
         for dirpath in dirs:
             if found:
                 break
@@ -161,10 +161,10 @@ class DLLs(BaseInstrumentation):
             if os.path.exists(dll_abspath):
                 self._loaded_dlls.add(dllpath.lower())
                 found = True
-            
+
         for path in searched:
             if self._is_path_dangerous(path):
-                data = {"dll": dllpath, "dangerous_path": path } 
+                data = {"dll": dllpath, "dangerous_path": path }
                 self.write_message(data)
     def _is_path_dangerous(self, path):
         current_user = f"{win32api.GetDomainName()}\\{win32api.GetUserName()}"
@@ -180,7 +180,7 @@ class DLLs(BaseInstrumentation):
             for dirpath in self._get_dll_search_path():
                 write_users = self._get_users_with_write_perms(dirpath)
                 write_users = ",".join(write_users)
-                if write_users: 
+                if write_users:
                     data = {"path": dirpath, "can_write": write_users}
                     self.write_message(data)
 
@@ -205,4 +205,3 @@ class DLLs(BaseInstrumentation):
                         data = {"dll": dllname, "dangerous_path": dllpath}
                         self.write_message(data)
 
-  

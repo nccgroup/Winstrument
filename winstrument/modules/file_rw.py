@@ -24,15 +24,13 @@ class FileRW(BaseInstrumentation):
         self._file_handles = {}
         self.file_writes = []
         self.file_reads  = []
-        
+
         self.modes = {
              "0x80000000": "GENERIC_READ",
              "0x40000000": "GENERIC_WRITE",
              "0xc0000000": "GENERIC_READ | GENERIC_WRITE",
              "0x10000000": "GENERIC_ALL"
         }
-
-
 
     def get_file_writes(self):
         return self.file_writes
@@ -74,4 +72,3 @@ class FileRW(BaseInstrumentation):
             else:
                 data = {"function": function, "fh": fh, "bytes": numbytes}
         self.write_message(data)
-

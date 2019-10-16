@@ -204,14 +204,14 @@ class FridaCmd(cmd2.Cmd):
         with [setting [value]]: set [setting] to [value]
         """
         if len(args) == 0:
-            settings = self._app.get_all_settings(self._app.CORE_MODNAME)
+            settings = self._app.settings_controller.get_module_settings(self._app.CORE_MODNAME)
             for key, value in settings.items():
                 self.poutput(f"{key}={value}")
         elif len(args) == 1:
-            value = self._app.get_setting(self._app.CORE_MODNAME, args[0])
+            value = self._app.settings_controller.get_setting(self._app.CORE_MODNAME, args[0])
             self.poutput(f"{args[0]}={value}")
         elif len(args) == 2:
-            self._app.set_setting(self._app.CORE_MODNAME,args[0], args[1])
+            self._app.settings_controller.set_setting(self._app.CORE_MODNAME,args[0], args[1])
         else:
             pass
 
@@ -221,8 +221,8 @@ class FridaCmd(cmd2.Cmd):
         usage: run
         Spawn and instrument the targer pocess
         """
-        target = self._app.get_setting(self._app.CORE_MODNAME,"target")
-        args = self._app.get_setting(self._app.CORE_MODNAME,"args")
+        target = self._app.settings_controller.get_setting(self._app.CORE_MODNAME,"target")
+        args = self._app.settings_controller.get_setting(self._app.CORE_MODNAME,"args")
         if target != "":
             self._app.run(target, args)
         else:

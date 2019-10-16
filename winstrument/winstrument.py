@@ -23,6 +23,7 @@ import sqlite3
 import json
 import toml
 from winstrument.db_connection import DBConnection
+from winstrument.settings_controller import SettingsController
 from winstrument.data.module_message import ModuleMessage 
 
 
@@ -31,11 +32,15 @@ class Winstrument():
     CORE_MODNAME = "core"
 
     def __init__(self):
-        self._db = DBConnection(os.path.join(os.path.dirname(__file__),"db.sqlite3"))
-        self.settings_default = {"target": "C:\\Windows\\System32\\Notepad.exe", "verbosity": "0"}
-        db_settings = self._db.restore_settings(self.CORE_MODNAME)
-        self.settings = {}
-        self.settings[self.CORE_MODNAME] = db_settings if db_settings else self.settings_default
+        appdata_path = os.environ["appdata"]
+        data_path = os.path.join(appdata_path,"winstrument")
+        settings_path = os.path.join(data_path, "settings.toml")
+
+        if not os.path.exists(data_path):
+            os.mkdir(data_path)
+
+        self._db = DBConnection(os.path.join(data_path,"db.sqlite3"))
+        self.settings_controller = SettingsController(settings_path)
 
         self.metadata = self.get_metadata()
         self._stop_requested = threading.Event()
@@ -64,72 +69,6 @@ class Winstrument():
         except toml.TomlDecodeError:
             metadata = None
         return metadata
-
-    def get_all_settings(self,modname):
-        """
-        Retrieve all settings for a given module name
-        modname - str
-        Returns a nested dict of settings for all modules keyed by module name
-        """
-        return self.settings[modname].copy()
-
-    def set_all_settings(self,modname,settings):
-        """
-        Set settings for an entire module all at once using the dict contained in settings
-        modname - str
-        settings - dict of string keys with any-type values
-        """
-        self.settings[modname] = settings
-
-    def set_setting(self, modname, key, val):
-        """
-        Set setting with key to given value for modname
-        modname - str
-        key - str
-        val - any type
-        """
-        self.settings[modname][key] = val
-
-    def get_setting(self, modname, key):
-        """
-        Get the setting with the speicfied key
-        modname - str
-        key - str
-        Returns the setting value, or None if the key does not exist
-        """
-        return self.settings[modname].get(key,None)
-
-    def get_setting_int(self, modname, key):
-        """
-        Gets the int representation of the setting stored in  the given key.
-        modname - str
-        key - str
-        Returns the setting value as int. Returns None if the setting isn't parsable to int or does not exist.
-        """
-        val=self.settings[modname].get(key,None)
-        try: 
-            num = int(val)
-        except TypeError:
-            num = None
-        return num
-            
-    def get_setting_boolean(self, modname, key):
-        """
-        Gets the boolean representation of the string setting stored in key for modname
-        modname - str
-        key - str
-        Returns True/False depending on setting value
-        Returns None if the value can't be interpreted as a boolean or does not exist
-
-        """
-
-        val = self.settings[modname].get(key,"").lower()
-        if val == "yes" or val == "true":
-            return True
-        elif val == "no" or val == "false":
-            return False
-        else:
-            raise TypeError(f"Can't parse value {val} as boolean for {key}")
 
     def get_available_modules(self):
         """
@@ -167,7 +106,7 @@ class Winstrument():
         messages = self._db.read_messages(modulename)
         if formatter is None:
             formatter = utils.format_table
-        verbosity = self.get_setting_int(self.CORE_MODNAME,"verbosity") or 0
+        verbosity = self.settings_controller.get_setting_int(self.CORE_MODNAME,"verbosity") or 0
         output.write(formatter(messages,verbosity)+"\n")
 
     def unload_module(self, module):
@@ -232,8 +171,8 @@ class Winstrument():
             process = target
             args = arglist
         else:
-            process = self.get_setting(self.CORE_MODNAME,"target")
-            args = self.get_setting(self.CORE_MODNAME,args)
+            process = self.settings_controller.get_setting(self.CORE_MODNAME,"target")
+            args = self.settings_controller.get_setting(self.CORE_MODNAME,"args")
         self._reactor.schedule(lambda: self._start(process,args))
         self._reactor.run()
 
@@ -246,8 +185,13 @@ class Winstrument():
 
 
         """
+        if target is None:
+            sys.stderr.write(f"{Fore.RED} No target set. Use 'set target <target> to specify a program to instrument.\n{Style.RESET_ALL}")
+            self.stop()
+            return
         cmd = [target]
         if args:
+
             cmd.append(args)
         try:
             pid = self._device.spawn(cmd)
@@ -275,8 +219,8 @@ class Winstrument():
     def quit(self):
         """
         Save settings to database. If save output if always_persist is set, otherwise prompt. """
-        self._db.save_settings(self.CORE_MODNAME,self.settings[self.CORE_MODNAME])
-        always_persist = self.get_setting(self.CORE_MODNAME,'always_persist')
+        self.settings_controller.save_settings()
+        always_persist = self.settings_controller.get_setting(self.CORE_MODNAME,'always_persist')
         persist = True
         if not always_persist:
             response = input("Save stored output in DB [Y]/n?")
@@ -321,7 +265,7 @@ class Winstrument():
             instrumentation.on_finish()
         self._instrumentations.clear() #reset for next session, if any
         self._sessions.remove(session)
-        verbosity = self.get_setting_int(self.CORE_MODNAME,"verbosity") or 0
+        verbosity = self.settings_controller.get_setting_int(self.CORE_MODNAME,"verbosity") or 0
         if verbosity >= 1:
             self.export_all(sys.stdout)
 

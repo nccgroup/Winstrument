@@ -34,13 +34,19 @@ class Winstrument():
     def __init__(self):
         appdata_path = os.environ["appdata"]
         data_path = os.path.join(appdata_path,"winstrument")
-        settings_path = os.path.join(data_path, "settings.toml")
-
+        
         if not os.path.exists(data_path):
             os.mkdir(data_path)
+
+        settings_path = os.path.join(data_path, "settings.toml")
+
         #unique temporary storage for each instance of the program
         self._db = DBConnection(os.path.join(data_path,f"db_{datetime.now().timestamp()}.sqlite3"))
         self.settings_controller = SettingsController(settings_path)
+        default_settings = {'target': 'C:\\Windows\\System32\\Calc.exe' , "verbosity": 0}
+        #settings won't exist on first run
+        if self.settings_controller.get_module_settings(self.CORE_MODNAME) == {}:
+            self.settings_controller.set_module_settings(self.CORE_MODNAME, default_settings)
 
         self.metadata = self.get_metadata()
         self._stop_requested = threading.Event()

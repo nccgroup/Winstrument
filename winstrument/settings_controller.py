@@ -68,7 +68,6 @@ class SettingsController:
           self.settings[modname][key] = val
         except KeyError:
             self.settings[modname] = {key: val}
-        print (self.settings)
 
     def get_setting(self, modname, key):
         """

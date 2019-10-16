@@ -25,7 +25,7 @@ import toml
 from winstrument.db_connection import DBConnection
 from winstrument.settings_controller import SettingsController
 from winstrument.data.module_message import ModuleMessage 
-
+from datetime import datetime
 
 class Winstrument():
     #adapted from https://github.com/frida/frida-python/blob/master/examples/child_gating.py
@@ -38,8 +38,8 @@ class Winstrument():
 
         if not os.path.exists(data_path):
             os.mkdir(data_path)
-
-        self._db = DBConnection(os.path.join(data_path,"db.sqlite3"))
+        #unique temporary storage for each instance of the program
+        self._db = DBConnection(os.path.join(data_path,f"db_{datetime.now().timestamp()}.sqlite3"))
         self.settings_controller = SettingsController(settings_path)
 
         self.metadata = self.get_metadata()
@@ -100,7 +100,7 @@ class Winstrument():
         Write the output for the given module to the given output stream in the desired format.
         modulename - str
         formatter - callable which takes a list of ModuleMessage objects and returns a string to output. See utils.py
-        outfile - file stream object. This could be a normal file or sys.stdout 
+        output - file stream object. This could be a normal file or sys.stdout 
         No return, but writes the output stream
         """
         messages = self._db.read_messages(modulename)
@@ -218,16 +218,10 @@ class Winstrument():
 
     def quit(self):
         """
-        Save settings to database. If save output if always_persist is set, otherwise prompt. """
+        Save settings to settings file. """
         self.settings_controller.save_settings()
-        always_persist = self.settings_controller.get_setting(self.CORE_MODNAME,'always_persist')
-        persist = True
-        if not always_persist:
-            response = input("Save stored output in DB [Y]/n?")
-            if not (response.lower() == "y" or response.lower() == ""):
-                persist = False
-        if not persist:
-            self._db.clear_output()
+        self._db.close()
+       
         
     def _instrument(self, pid, path):
         """
@@ -266,8 +260,7 @@ class Winstrument():
         self._instrumentations.clear() #reset for next session, if any
         self._sessions.remove(session)
         verbosity = self.settings_controller.get_setting_int(self.CORE_MODNAME,"verbosity") or 0
-        if verbosity >= 1:
-            self.export_all(sys.stdout)
+        self.export_all(sys.stdout)
 
         self._reactor.schedule(self._stop_if_idle, delay=0.5)
 

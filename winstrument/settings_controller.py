@@ -17,19 +17,25 @@ from winstrument.data.module_message import ModuleMessage
 import sys
 from datetime import datetime
 import json
+import os
 import toml
 class SettingsController:
 
     def __init__(self,filename):
         self.settings = {}
-        self._settingsfile = open(filename,  'w+')
+        self._settings_filename = filename
         self.read_settings()
    
     def read_settings(self):
-        self.settings = toml.loads(self._settingsfile.read())
+        if not os.path.exists(self._settings_filename):
+            self.settings = {}
+            return
+        with open(self._settings_filename,'r') as settings_file:
+           self.settings = toml.loads(settings_file.read())
    
     def save_settings(self):
-        self._settingsfile.write(toml.dumps(self.settings))
+        with open(self._settings_filename, 'w') as settings_file:
+          settings_file.write(toml.dumps(self.settings))
    
     def get_module_settings(self,modname):
         """
@@ -62,6 +68,7 @@ class SettingsController:
           self.settings[modname][key] = val
         except KeyError:
             self.settings[modname] = {key: val}
+        print (self.settings)
 
     def get_setting(self, modname, key):
         """

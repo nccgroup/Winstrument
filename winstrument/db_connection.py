@@ -17,11 +17,13 @@ from winstrument.data.module_message import ModuleMessage
 import sys
 from datetime import datetime
 import json
-
+import os
+import toml
 class DBConnection():
 
-    def __init__(self,dbname):
-        self._db = sqlite3.connect(dbname,check_same_thread=False)
+    def __init__(self,dbpath):
+        self._db = sqlite3.connect(dbpath,check_same_thread=False)
+        self._dbpath = dbpath
         self._cursor = self._db.cursor()
         self._cursor.execute("""CREATE TABLE IF NOT EXISTS output 
                             (id INTEGER PRIMARY KEY,
@@ -29,11 +31,6 @@ class DBConnection():
                             time TEXT NOT NULL,
                             target TEXT NOT NULL,
                             message BLOB)""")
-        self._cursor.execute("""CREATE TABLE IF NOT EXISTS settings
-                            (id INTEGER PRIMARY KEY,
-                             modname TEXT NOT NULL UNIQUE,
-                             settings_json BLOB)""")
-
         self._db.commit()
 
     def write_message(self, message):
@@ -67,31 +64,9 @@ class DBConnection():
             messages.append(ModuleMessage(module,target,data,time=time))
         return messages
 
-    def save_settings(self, modname, settings):
-        """
-        Store the provided settings dictionary into the db for the given module name
-        modname: str - Name of the module
-        settings: dict - dict of key/value setting pairs to store in the db.
-        """
-        self._cursor.execute("SELECT \"settings_json\" from \"settings\" WHERE \"modname\" = ?",(modname,))
-        if not self._cursor.fetchall():
-            self._cursor.execute("""INSERT INTO "settings" (modname, settings_json)
-                VALUES (? , ?)""", (modname, json.dumps(settings)))
-        else:
-            self._cursor.execute("""UPDATE "settings" SET "settings_json" = ? WHERE modname = ?""",(json.dumps(settings), modname))
-        self._db.commit()
+    def close(self):
+        self._db.close()
+        os.remove(self._dbpath)
 
-    def restore_settings(self, modname):
-        """
-        Retrieve a dict of settings stored in the db for the module with the given name, if any exist
-        modname: str - Name of the module
-        Return: dict of settings if stored settings are found for the module name. Returns None if no settings were found.
-        """
-        self._cursor.execute("""SELECT "settings_json" FROM "settings" WHERE  modname = ? """, (modname,))
-        rows = self._cursor.fetchone()
-        if rows:
-            return json.loads(rows[0])
-        else:
-            return None  
 
     

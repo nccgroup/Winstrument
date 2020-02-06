@@ -14,27 +14,28 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-var functions = ['connect','recv','send'];
-functions.forEach(function (name) { Interceptor.attach(Module.getExportByName('ws2_32.dll',name), {
-        onEnter: function(args) {
-           var fd = args[0].toInt32()
-           var type = Socket.type(fd)
-           var addr = Socket.peerAddress(fd)
-           var ip = null;
-           var port = null;
-           if (addr !== null) {
-               ip=addr.ip;
-               port = addr.port;
-           }
-           var data = {
-                    "function": name,
-                    "type": type,
-                    "address": ip,
-                    "port": port
-
-           };
-           send(data);
-
+var functions = ['connect', 'recv', 'send'];
+functions.forEach(function (name) {
+    Interceptor.attach(Module.getExportByName('ws2_32.dll', name), {
+        onEnter: function (args) {
+            var fd = args[0].toInt32()
+            var type = Socket.type(fd)
+            var addr = Socket.peerAddress(fd)
+            var ip = null;
+            var port = null;
+            if (addr !== null) {
+                ip = addr.ip;
+                port = addr.port;
             }
-        })
-    });
+            var data = {
+                "function": name,
+                "type": type,
+                "address": ip,
+                "port": port
+
+            };
+            send(data);
+
+        }
+    })
+});

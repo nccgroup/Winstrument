@@ -16,22 +16,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 //registry subkey parsing logic sourced from https://www.fuzzysecurity.com/tutorials/29.html
-["RegOpenKeyExW","RegGetValueW"].forEach(function (name) {
-    Interceptor.attach(Module.getExportByName("KernelBase.dll",name), {
+["RegOpenKeyExW", "RegGetValueW"].forEach(function (name) {
+    Interceptor.attach(Module.getExportByName("KernelBase.dll", name), {
         //This should theoretically also hook RegOpenKeyW from Kernel32.dll/ADVAPI.dll because those calls go to RegOpenKeyExW in KernelBase (on Win 10 at least)
-        onEnter: function(args) {
+        onEnter: function (args) {
             this.subkey = args[1].readUtf16String();
-            if (this.subkey && this.subkey.indexOf("CLSID\\") >= 0)
-            {
-                this.hasClsid =  1;
+            if (this.subkey && this.subkey.indexOf("CLSID\\") >= 0) {
+                this.hasClsid = 1;
             }
 
         },
-        onLeave: function(ret)
-        {
-            if (this.hasClsid && ret.toInt32() !== 0)
-            {
-                send({"function":name, "subkey": this.subkey});
+        onLeave: function (ret) {
+            if (this.hasClsid && ret.toInt32() !== 0) {
+                send({ "function": name, "subkey": this.subkey });
             }
         }
     });

@@ -14,11 +14,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-Interceptor.attach(Module.getExportByName("advapi32.dll","ImpersonateLoggedOnUser"), {
-    onEnter: function(args)
-    {
+Interceptor.attach(Module.getExportByName("advapi32.dll", "ImpersonateLoggedOnUser"), {
+    onEnter: function (args) {
         this.token = args[0].readInt();
-        send({"function": "ImpersonateLoggedOnUser", "token": this.token});
+        send({ "function": "ImpersonateLoggedOnUser", "token": this.token });
     }
 
 });

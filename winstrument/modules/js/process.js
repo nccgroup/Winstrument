@@ -14,20 +14,20 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-Interceptor.attach(Module.getExportByName('kernel32.dll',"CreateProcessW"), {
-    onEnter: function(args) {
+Interceptor.attach(Module.getExportByName('kernel32.dll', "CreateProcessW"), {
+    onEnter: function (args) {
         var application = args[0].readUtf16String();
         var cmdline = args[1].readUtf16String();
-        send({"function": "CreateProcessW", "application": application, "args": cmdline});
+        send({ "function": "CreateProcessW", "application": application, "args": cmdline });
 
     }
 });
 
 Interceptor.attach(Module.getExportByName('kernel32.dll', "CreateProcessA"), {
-    onEnter: function(args) {
+    onEnter: function (args) {
         var application = args[0].readAnsiString();
         var cmdline = args[1].readAnsiString();
-        send({"function":"CreateProcessA", "application": application, "args": cmdline});
+        send({ "function": "CreateProcessA", "application": application, "args": cmdline });
 
     }
 });

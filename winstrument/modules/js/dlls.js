@@ -15,25 +15,25 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-    ["LoadLibraryW","LoadLibraryExW",].forEach(function (name) {
-Interceptor.attach(Module.getExportByName('kernel32.dll',name), {
-    onEnter: function(args) {
-        var lib_filename = args[0].readUtf16String();
-        send({"function":name, "lib_filename":lib_filename});
+["LoadLibraryW", "LoadLibraryExW",].forEach(function (name) {
+    Interceptor.attach(Module.getExportByName('kernel32.dll', name), {
+        onEnter: function (args) {
+            var lib_filename = args[0].readUtf16String();
+            send({ "function": name, "lib_filename": lib_filename });
 
-    }
+        }
 
 
+    });
 });
-});
 
-["LoadLibraryA","LoadLibraryExA",].forEach(function (name) {
-Interceptor.attach(Module.getExportByName('kernel32.dll',name), {
-    onEnter: function(args) {
-        var lib_filename = args[0].readAnsiString();
-        send({"function":name, "lib_filename":lib_filename});
+["LoadLibraryA", "LoadLibraryExA",].forEach(function (name) {
+    Interceptor.attach(Module.getExportByName('kernel32.dll', name), {
+        onEnter: function (args) {
+            var lib_filename = args[0].readAnsiString();
+            send({ "function": name, "lib_filename": lib_filename });
 
-    }
+        }
 
 
     });

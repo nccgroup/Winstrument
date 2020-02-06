@@ -2,9 +2,9 @@
 Winstrument is a framework of modular scripts to aid in instrumenting Windows software using Frida for reverse engineering and attack surface analysis.
 
 ### Contents
+* [Installation](#installation)
 * [Usage](#usage)
 * [Project Structure](#project-structure)
-* [Installation](#installation)
 * [Modules](#modules)
 * [CLI](#cli)
 * [Troubleshooting](#troubleshooting)

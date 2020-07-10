@@ -61,7 +61,7 @@ class FileRW(BaseInstrumentation):
                 path = self._file_handles[fh]["path"]
                 data = {"function": function, "fh": fh, "path": path, "bytes": numbytes}
             else:
-                data = {"function": function, "fh": fh, "bytes": numbytes}
+               data = None
 
         elif function == "ReadFile" or function == "ReadFileEx":
             fh = payload["fh"]
@@ -70,5 +70,6 @@ class FileRW(BaseInstrumentation):
                 path = self._file_handles[fh]["path"]
                 data = {"function" : function, "fh": fh, "path":path, "bytes":numbytes}
             else:
-                data = {"function": function, "fh": fh, "bytes": numbytes}
-        self.write_message(data)
+                data = None
+        if data:
+            self.write_message(data)

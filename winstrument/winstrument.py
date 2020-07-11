@@ -155,7 +155,7 @@ class Winstrument():
     def _initialize_modules(self, modulepath = "winstrument.modules"):
         """
         Import python modules that are set to be loaded. If the module is not found, print a warning to STDOUT and remove the module from the _modules_to_load list.
-        modulepath: string - Python import path for modules. This is a Python path, not a Windows path.jjjj
+        modulepath: string - Python import path for modules. This is a Python path, not a Windows path.
         """
         for modulename in self._modules_to_load:
             try:

@@ -163,19 +163,19 @@ class DLLs(BaseInstrumentation):
                 found = True
 
         for path in searched:
-            if self._is_path_dangerous(path):
-                data = {"dll": dllpath, "dangerous_path": path }
+            if self._is_path_writeable(path):
+                data = {"dll": dllpath, "writeable_path": path }
                 self.write_message(data)
-    def _is_path_dangerous(self, path):
+    def _is_path_writeable(self, path):
         current_user = f"{win32api.GetDomainName()}\\{win32api.GetUserName()}"
         auth_users = "NT AUTHORITY\\Authenticated Users"
         all_users = "BUILTIN\\USERS"
         write_users = self._get_users_with_write_perms(path)
-        dangerous = False
+        writeable = False
         for user in write_users:
             if auth_users.lower() == user.lower() or current_user.lower() == user.lower() or all_users.lower()==user.lower():
-                dangerous = True
-        return dangerous
+                writeable = True
+        return writeable
     def _get_writable_search_dirs(self):
             for dirpath in self._get_dll_search_path():
                 write_users = self._get_users_with_write_perms(dirpath)
@@ -201,7 +201,7 @@ class DLLs(BaseInstrumentation):
                 if not os.path.isabs(dllpath): #Don't need to resolve names that are already absolute
                     self._resolve_relative_dll_path(dllpath)
                 else:
-                    if self._is_path_dangerous(dllpath):
-                        data = {"dll": dllname, "dangerous_path": dllpath}
+                    if self._is_path_writeable(dllpath):
+                        data = {"dll": dllname, "writeable_path": dllpath}
                         self.write_message(data)
 

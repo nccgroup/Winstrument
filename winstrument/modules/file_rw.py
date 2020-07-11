@@ -22,8 +22,9 @@ class FileRW(BaseInstrumentation):
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self._file_handles = {}
-        self.file_writes = []
-        self.file_reads  = []
+        self.files_read = {}
+        self.files_written = {}
+
 
         self.modes = {
              "0x80000000": "GENERIC_READ",
@@ -32,17 +33,17 @@ class FileRW(BaseInstrumentation):
              "0x10000000": "GENERIC_ALL"
         }
 
-    def get_file_writes(self):
-        return self.file_writes
+    def get_files_written(self):
+        return self.files_written
 
-    def get_file_reads(self):
-        return self.file_reads
+    def get_files_read(self):
+        return self.files_read
 
     def on_message(self, message,data):
         if message["type"] == "error":
             print("Error: {0}".format(message))
             return
-
+        date=None
         payload = message["payload"]
 
         function = payload["function"]
@@ -52,24 +53,47 @@ class FileRW(BaseInstrumentation):
             fh = payload["fh"]
             if fh == 0xffffffff: #INVALID HANDLE
                 fh = "INVALID_HANDLE_VALUE"
-            data = {"function": function, "fh": payload["fh"], "path": payload["path"], "mode": modename}
-
+            if modename == "GENERIC_READ":
+                if not fh in self.files_read: 
+                  data = {"function": function, "fh": fh, "path": payload["path"], "mode": modename}
+                  self.files_read[fh] = data
+            elif modename == "GENERIC_WRITE":
+                if not fh in self.files_written:
+                  data = {"function": function, "fh": fh, "path": payload["path"], "mode": modename}
+                  self.files_written[fh] = data
+            else: #both
+                if not fh in self.files_read: 
+                  data = {"function": function, "fh": fh, "path": payload["path"], "mode": modename}
+                  self.files_read[fh] = data
+                if not fh in self.files_written:
+                  data = {"function": function, "fh": fh, "path": payload["path"], "mode": modename}
+                  self.files_written[fh] = data
         elif function == "WriteFile":
             fh = payload["fh"]
             numbytes = payload["bytes_written"]
-            if fh in self._file_handles:
-                path = self._file_handles[fh]["path"]
-                data = {"function": function, "fh": fh, "path": path, "bytes": numbytes}
-            else:
-               data = None
-
+            if fh in self.files_written:
+                prevbytes = self.files_written[fh].get("bytes",0)
+                self.files_written[fh]["function"] = function
+                self.files_written[fh]["bytes"] = prevbytes + numbytes
+              #  path = self.files_written[fh]["path"]
+              #  data = {"function": function, "fh": fh, "path": path, "bytes": numbytes}
+   
         elif function == "ReadFile" or function == "ReadFileEx":
             fh = payload["fh"]
             numbytes = payload.get("bytes_read",payload["bytes_to_read"]) #no bytes_read for ReadFileEx
-            if fh in self._file_handles:
-                path = self._file_handles[fh]["path"]
-                data = {"function" : function, "fh": fh, "path":path, "bytes":numbytes}
-            else:
-                data = None
-        if data:
-            self.write_message(data)
+            if fh in self.files_read:
+               prevbytes= self.files_read[fh].get("bytes",0)
+               self.files_read[fh]["function"] = function
+               self.files_read[fh]["bytes"] = prevbytes + numbytes
+               # path = self._file_handles[fh]["path"]
+               # data = {"function" : function, "fh": fh, "path":path, "bytes":numbytes}
+        # 
+      #  if data:
+          #  self.write_message(data)
+    def on_finish(self):
+        for fh in self.files_read.values():
+            if fh.get("bytes",0) > 0:
+                self.write_message(fh)
+        for fh in self.files_written.values():
+            if fh.get("bytes",0) > 0:
+                self.write_message(fh)

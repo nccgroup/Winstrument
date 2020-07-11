@@ -6,7 +6,7 @@ if sys.version_info < (3,7):
 
 setuptools.setup(
     name="winstrument",
-    version = "0.1.0",
+    version = "0.1.1",
     long_description = open('README.md','r').read(),
     long_description_content_type = 'text/markdown',
     author='George Osterweil',

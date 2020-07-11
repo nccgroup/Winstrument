@@ -22,7 +22,7 @@ setuptools.setup(
         "frida-tools==3.0.0",
         "pyperclip==1.7.0",
         "pyreadline==2.1",
-        "pywin32==224",
+        "pywin32>=224",
         "tabulate==0.8.3",
         "toml==0.10.0",
         "wcwidth==0.1.7"

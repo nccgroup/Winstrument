@@ -22,6 +22,8 @@ and then to execute the program, run:
 winstrument
 ~~~
 
+Note that the tool is currently experimental, and may sometimes freeze or have other stability issues.
+
 In some cases, such as a fresh Windows 10 install, you may encounter a SSL error in pip when installing Frida. If this happens, see [Troubleshooting](#troubleshooting) below.
 ## Usage
 
